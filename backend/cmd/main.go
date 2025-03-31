@@ -5,9 +5,13 @@ import (
 	"log"
 
 	"todoapp-backend/internal/db"
+	"todoapp-backend/internal/logger"
 )
 
 func main() {
+	logger.Setup()
+	defer logger.Cleanup()
+
 	if err := db.Connect(); err != nil {
 		log.Panicln("Error connecting to database:", err)
 	}
