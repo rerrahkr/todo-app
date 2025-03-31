@@ -1,10 +1,13 @@
-CREATE TABLE IF NOT EXISTS todolist (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS todos;
+
+CREATE TABLE IF NOT EXISTS todos (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    content TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO todolist (title, description) VALUES
-('Sample Task 1', 'This is a sample task description.'),
-('Sample Task 2', 'This is another sample task description.');
+INSERT INTO todos (content) VALUES
+('Task 1'),
+('Task 2'),
+('Task 3');
