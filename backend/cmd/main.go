@@ -26,5 +26,48 @@ func main() {
 		log.Panicln("Unable to ping database:", err)
 	}
 
+	todos, err := db.GetAllTodos()
+	if err != nil {
+		log.Panicln("Error getting todos:", err)
+	}
+
+	fmt.Println(todos)
+
+	_, err = db.NewTodo(fmt.Sprintf("Task %v", len(todos)+1))
+	if err != nil {
+		log.Panicln("Error creating todo:", err)
+	}
+
+	todos, err = db.GetAllTodos()
+	if err != nil {
+		log.Panicln("Error getting todos:", err)
+	}
+
+	fmt.Println(todos)
+
+	_, err = db.UpdateTodo(len(todos), "Updated")
+	if err != nil {
+		log.Panicln("Error updating todo:", err)
+	}
+
+	todos, err = db.GetAllTodos()
+	if err != nil {
+		log.Panicln("Error getting todos:", err)
+	}
+
+	fmt.Println(todos)
+
+	err = db.DeleteTodo(len(todos))
+	if err != nil {
+		log.Panicln("Error deleting todo:", err)
+	}
+
+	todos, err = db.GetAllTodos()
+	if err != nil {
+		log.Panicln("Error getting todos:", err)
+	}
+
+	fmt.Println(todos)
+
 	fmt.Println("Hello, World!")
 }
