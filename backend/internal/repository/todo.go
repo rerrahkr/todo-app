@@ -9,10 +9,10 @@ import (
 
 // Interface of todo repository.
 type TodoRepository interface {
-	NewTodo(content string) (*model.Todo, error)
+	NewTodo(todo *model.Todo) (*model.Todo, error)
 	GetAllTodos() ([]model.Todo, error)
 	GetTodoByID(id int) (*model.Todo, error)
-	UpdateTodo(id int, content string) (*model.Todo, error)
+	UpdateTodo(todo *model.Todo) (*model.Todo, error)
 	DeleteTodoByID(id int) error
 }
 
@@ -24,16 +24,16 @@ func NewTodoRepository() TodoRepository {
 	return &todoRepository{}
 }
 
-func (*todoRepository) NewTodo(content string) (*model.Todo, error) {
+func (*todoRepository) NewTodo(todo *model.Todo) (*model.Todo, error) {
 	cmd := `INSERT INTO todos (content) VALUES ($1) RETURNING *`
-	row := pool.QueryRow(context.Background(), cmd, content)
+	row := pool.QueryRow(context.Background(), cmd, todo.Content)
 
-	todo := &model.Todo{}
-	if err := row.Scan(&todo.ID, &todo.Content, &todo.CreatedAt, &todo.UpdatedAt); err != nil {
+	newTodo := &model.Todo{}
+	if err := row.Scan(&newTodo.ID, &newTodo.Content, &newTodo.CreatedAt, &newTodo.UpdatedAt); err != nil {
 		return nil, err
 	}
 
-	return todo, nil
+	return newTodo, nil
 }
 
 func (*todoRepository) GetAllTodos() ([]model.Todo, error) {
@@ -72,16 +72,16 @@ func (*todoRepository) GetTodoByID(id int) (*model.Todo, error) {
 	return todo, nil
 }
 
-func (*todoRepository) UpdateTodo(id int, content string) (*model.Todo, error) {
+func (*todoRepository) UpdateTodo(todo *model.Todo) (*model.Todo, error) {
 	cmd := `UPDATE todos SET content = $1, updated_at = $2 WHERE id = $3 RETURNING *`
-	row := pool.QueryRow(context.Background(), cmd, content, time.Now(), id)
+	row := pool.QueryRow(context.Background(), cmd, todo.Content, time.Now(), todo.ID)
 
-	todo := &model.Todo{}
-	if err := row.Scan(&todo.ID, &todo.Content, &todo.CreatedAt, &todo.UpdatedAt); err != nil {
+	newTodo := &model.Todo{}
+	if err := row.Scan(&newTodo.ID, &newTodo.Content, &newTodo.CreatedAt, &newTodo.UpdatedAt); err != nil {
 		return nil, err
 	}
 
-	return todo, nil
+	return newTodo, nil
 }
 
 func (*todoRepository) DeleteTodoByID(id int) error {

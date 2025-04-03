@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"todoapp-backend/internal/logger"
+	"todoapp-backend/internal/model"
 	"todoapp-backend/internal/repository"
 )
 
@@ -35,7 +36,7 @@ func main() {
 
 	fmt.Println(todos)
 
-	_, err = todoRepository.NewTodo(fmt.Sprintf("Task %v", len(todos)+1))
+	_, err = todoRepository.NewTodo(&model.Todo{Content: fmt.Sprintf("Task %v", len(todos)+1)})
 	if err != nil {
 		log.Panicln("Error creating todo:", err)
 	}
@@ -47,7 +48,7 @@ func main() {
 
 	fmt.Println(todos)
 
-	_, err = todoRepository.UpdateTodo(len(todos), "Updated")
+	_, err = todoRepository.UpdateTodo(&model.Todo{ID: len(todos), Content: "Updated"})
 	if err != nil {
 		log.Panicln("Error updating todo:", err)
 	}
