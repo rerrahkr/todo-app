@@ -3,17 +3,40 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"todoapp-backend/internal/logger"
 	"todoapp-backend/internal/model"
 	"todoapp-backend/internal/repository"
+
+	"github.com/joho/godotenv"
 )
+
+// Get database configuration from .env file.
+func loadEnv() *repository.Config {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Panicln("Error loading .env file")
+	}
+
+	dbConfig := &repository.Config{}
+
+	dbConfig.URI = os.Getenv("POSTGRES_URI")
+	if dbConfig.URI == "" {
+		log.Panicln("\"POSTGRES_URI\" not set in .env file")
+	}
+
+	return dbConfig
+}
 
 func main() {
 	logger.Setup()
 	defer logger.Cleanup()
 
-	if err := repository.Connect(); err != nil {
+	dbConfig := loadEnv()
+	log.Println("Loaded .env file")
+
+	if err := repository.Connect(dbConfig); err != nil {
 		log.Panicln("Error connecting to database:", err)
 	}
 	log.Println("Connected to database")
