@@ -94,9 +94,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: integer
-                  description: ID of the todo.
                 content:
                   type: string
                   description: Main content of todo.
