@@ -1,0 +1,160 @@
+openapi: 3.0.4
+
+info:
+  title: Todo list API
+  description: Simple todo list API.
+  version: 0.1.0
+
+servers:
+  - url: http://backend:5432
+    description: Backend server running on a docker container.
+
+tags:
+  - name: todos
+    description: Todo list.
+
+paths:
+  /todos:
+    get:
+      summary: Get all todos.
+      description: Get a list of all todos.
+      tags:
+        - todos
+      responses:
+        "200":
+          description: A JSON array of todos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todos"
+          
+    post:
+      summary: Create a new todo.
+      description: Create a new todo item.
+      tags:
+        - todos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: Main content of todo.
+                  example: "Study API server with Go"
+      responses:
+        "201":
+          description: A list of all todos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todos"
+
+  /todos/{id}:
+    get:
+      summary: Get a todo by ID.
+      description: Get a specific todo item by its ID.
+      tags:
+        - todos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the todo.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A single todo item.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        "404":
+          description: Todo was not found.
+
+    put:
+      summary: Update a todo by ID.
+      description: Update a specific todo item by its ID.
+      tags:
+        - todos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the todo to update.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: ID of the todo.
+                content:
+                  type: string
+                  description: Main content of todo.
+                  example: "Study API server with Go"
+      responses:
+        "200":
+          description: Updated Todo successfully. Returns all todos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todos"
+        "201":
+          description: Created Todo successfully. Returns all todos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todos"
+
+    delete:
+      summary: Delete a todo by ID.
+      description: Delete a specific todo item by its ID.
+      tags:
+        - todos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the todo to delete.
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted Todo successfully. Returns all todos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todos"
+        "404":
+          description: Todo not found.
+
+components:
+  schemas:
+    Todos:
+      type: array
+      items:
+        $ref: "#/components/schemas/Todo"
+    Todo:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+          description: Main content of todo.
+          example: "Study API server with Go"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
