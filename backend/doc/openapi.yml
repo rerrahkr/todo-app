@@ -125,7 +125,7 @@ paths:
           schema:
             type: integer
       responses:
-        "204":
+        "200":
           description: Deleted Todo successfully. Returns all todos.
           content:
             application/json:
