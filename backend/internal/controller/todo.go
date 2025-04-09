@@ -90,7 +90,7 @@ func (c *todoController) GetAllTodos(w http.ResponseWriter, r *http.Request) {
 func parseID(pathStr string) (int, error) {
 	idStr := path.Base(pathStr)
 	id, err := strconv.Atoi(idStr)
-	if err != nil || id < 0 {
+	if err != nil || id <= 0 {
 		return 0, errors.New("invalid ID")
 	}
 	return id, nil

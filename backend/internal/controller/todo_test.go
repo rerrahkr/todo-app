@@ -14,8 +14,8 @@ import (
 type TodoServiceMock struct{}
 
 var expectedTodos = []service.Todo{
-	{ID: 0, Content: "A"},
-	{ID: 1, Content: "B"},
+	{ID: 1, Content: "A"},
+	{ID: 2, Content: "B"},
 }
 
 func (s *TodoServiceMock) NewTodo(req *service.NewTodoRequest) error {
@@ -33,15 +33,15 @@ func (*TodoServiceMock) GetAllTodos() (*service.GetAllTodosResponse, error) {
 }
 
 func (*TodoServiceMock) GetTodoByID(req *service.GetTodoByIDRequest) (*service.GetTodoByIDResponse, error) {
-	if req.ID != 0 {
+	if req.ID != 1 {
 		return nil, errors.New("")
 	}
 
-	return &service.GetTodoByIDResponse{ID: 0, Content: "A"}, nil
+	return &service.GetTodoByIDResponse{ID: 1, Content: "A"}, nil
 }
 
 func (*TodoServiceMock) UpdateTodo(req *service.UpdateTodoRequest) error {
-	if req.ID != 0 {
+	if req.ID != 1 {
 		return errors.New("")
 	}
 
@@ -49,7 +49,7 @@ func (*TodoServiceMock) UpdateTodo(req *service.UpdateTodoRequest) error {
 }
 
 func (*TodoServiceMock) DeleteTodoByID(req *service.DeleteTodoByIDRequest) error {
-	if req.ID != 0 {
+	if req.ID != 1 {
 		return errors.New("")
 	}
 
@@ -127,7 +127,7 @@ func TestGetAllTodos(t *testing.T) {
 
 func TestGetTodoByID(t *testing.T) {
 	t.Run("Valid ID", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/todos/0", nil)
+		req := httptest.NewRequest(http.MethodGet, "/todos/1", nil)
 		w := httptest.NewRecorder()
 
 		controller.GetTodoByID(w, req)
@@ -145,15 +145,15 @@ func TestGetTodoByID(t *testing.T) {
 			t.Fatal("Failed in TodoController.GetTodoByID: Invalid response body")
 		}
 
-		if res.ID != 0 {
-			t.Fatalf("Failed in TodoController.GetTodoByID: ID of todo is %v but actual is %v", 0, res.ID)
+		if res.ID != 1 {
+			t.Fatalf("Failed in TodoController.GetTodoByID: ID of todo is %v but actual is %v", 1, res.ID)
 		} else if res.Content != "A" {
 			t.Fatalf("Failed in TodoController.GetTodoByID: Content of todo is %v but actual is %v", "A", res.Content)
 		}
 	})
 
 	t.Run("Invalid ID", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/todos/1", nil)
+		req := httptest.NewRequest(http.MethodGet, "/todos/2", nil)
 		w := httptest.NewRecorder()
 
 		controller.GetTodoByID(w, req)
@@ -170,7 +170,7 @@ func TestUpdateTodo(t *testing.T) {
 			"content": "New",
 		}
 		jsonBody, _ := json.Marshal(body)
-		req := httptest.NewRequest(http.MethodPut, "/todos/0", bytes.NewReader(jsonBody))
+		req := httptest.NewRequest(http.MethodPut, "/todos/1", bytes.NewReader(jsonBody))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 
@@ -190,7 +190,7 @@ func TestUpdateTodo(t *testing.T) {
 			"content": "New",
 		}
 		jsonBody, _ := json.Marshal(body)
-		req := httptest.NewRequest(http.MethodPut, "/todos/1", bytes.NewReader(jsonBody))
+		req := httptest.NewRequest(http.MethodPut, "/todos/2", bytes.NewReader(jsonBody))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 
@@ -208,7 +208,7 @@ func TestUpdateTodo(t *testing.T) {
 
 func TestDeleteTodoByID(t *testing.T) {
 	t.Run("Valid ID", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/todos/0", nil)
+		req := httptest.NewRequest(http.MethodGet, "/todos/1", nil)
 		w := httptest.NewRecorder()
 
 		controller.DeleteTodoByID(w, req)
@@ -223,7 +223,7 @@ func TestDeleteTodoByID(t *testing.T) {
 	})
 
 	t.Run("Invalid ID", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/todos/1", nil)
+		req := httptest.NewRequest(http.MethodGet, "/todos/2", nil)
 		w := httptest.NewRecorder()
 
 		controller.DeleteTodoByID(w, req)

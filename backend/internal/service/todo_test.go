@@ -15,13 +15,13 @@ func (s *TodoRepositoryStub) NewTodo(todo *model.Todo) (*model.Todo, error) {
 
 func (s *TodoRepositoryStub) GetAllTodos() ([]model.Todo, error) {
 	return []model.Todo{
-		{ID: 0, Content: "A"},
-		{ID: 1, Content: "B"},
+		{ID: 1, Content: "A"},
+		{ID: 2, Content: "B"},
 	}, nil
 }
 
 func (s *TodoRepositoryStub) GetTodoByID(id int) (*model.Todo, error) {
-	todo := model.Todo{ID: 0, Content: "0"}
+	todo := model.Todo{ID: 1, Content: "0"}
 
 	if todo.ID != id {
 		return nil, errors.New("")
@@ -31,7 +31,7 @@ func (s *TodoRepositoryStub) GetTodoByID(id int) (*model.Todo, error) {
 }
 
 func (s *TodoRepositoryStub) UpdateTodo(todo *model.Todo) (*model.Todo, error) {
-	td := model.Todo{ID: 0, Content: "1"}
+	td := model.Todo{ID: 1, Content: "1"}
 
 	if td.ID != todo.ID {
 		return nil, errors.New("")
@@ -41,7 +41,7 @@ func (s *TodoRepositoryStub) UpdateTodo(todo *model.Todo) (*model.Todo, error) {
 }
 
 func (s *TodoRepositoryStub) DeleteTodoByID(id int) error {
-	if id != 0 {
+	if id != 1 {
 		return errors.New("")
 	}
 
@@ -69,8 +69,8 @@ func TestNewTodo(t *testing.T) {
 func TestGetAllTodos(t *testing.T) {
 	expected := GetAllTodosResponse{
 		Todos: []Todo{
-			{ID: 0, Content: "A"},
-			{ID: 1, Content: "B"},
+			{ID: 1, Content: "A"},
+			{ID: 2, Content: "B"},
 		},
 	}
 
@@ -93,8 +93,8 @@ func TestGetAllTodos(t *testing.T) {
 
 func TestGetTodoByID(t *testing.T) {
 	t.Run("Give a valid ID", func(t *testing.T) {
-		expected := model.Todo{ID: 0, Content: "0"}
-		actual, err := service.GetTodoByID(&GetTodoByIDRequest{ID: 0})
+		expected := model.Todo{ID: 1, Content: "0"}
+		actual, err := service.GetTodoByID(&GetTodoByIDRequest{ID: 1})
 		if err != nil {
 			t.Fatalf("Failed in TodoService.GetTodoByID: %v", err)
 		} else if actual.ID != expected.ID || actual.Content != expected.Content {
@@ -108,7 +108,7 @@ func TestGetTodoByID(t *testing.T) {
 			t.Errorf("Failed in TodoService.GetTodoByID: No error occurs when an invalid ID is given")
 		}
 
-		_, err = service.GetTodoByID(&GetTodoByIDRequest{ID: 1})
+		_, err = service.GetTodoByID(&GetTodoByIDRequest{ID: 2})
 		if err == nil {
 			t.Errorf("Failed in TodoService.GetTodoByID: No error occurs when an invalid ID is given")
 		}
@@ -117,14 +117,14 @@ func TestGetTodoByID(t *testing.T) {
 
 func TestUpdateTodo(t *testing.T) {
 	t.Run("Give a valid ID", func(t *testing.T) {
-		req := UpdateTodoRequest{ID: 0, Content: "ABC"}
+		req := UpdateTodoRequest{ID: 1, Content: "ABC"}
 		if err := service.UpdateTodo(&req); err != nil {
 			t.Fatalf("Failed in TodoService.UpdateTodo: %v", err)
 		}
 	})
 
 	t.Run("Give an invalid ID", func(t *testing.T) {
-		req := UpdateTodoRequest{ID: 1}
+		req := UpdateTodoRequest{ID: 2}
 		if err := service.UpdateTodo(&req); err == nil {
 			t.Fatal("Failed in TodoService.UpdateTodo: No error occurs when an invalid ID is given")
 		}
@@ -133,14 +133,14 @@ func TestUpdateTodo(t *testing.T) {
 
 func TestDeleteTodoByID(t *testing.T) {
 	t.Run("Give a valid ID", func(t *testing.T) {
-		req := DeleteTodoByIDRequest{ID: 0}
+		req := DeleteTodoByIDRequest{ID: 1}
 		if err := service.DeleteTodoByID(&req); err != nil {
 			t.Fatalf("Failed in TodoService.DeleteTodo: %v", err)
 		}
 	})
 
 	t.Run("Give an invalid ID", func(t *testing.T) {
-		req := DeleteTodoByIDRequest{ID: 1}
+		req := DeleteTodoByIDRequest{ID: 2}
 		if err := service.DeleteTodoByID(&req); err == nil {
 			t.Fatal("Failed in TodoService.DeleteTodo: No error occurs when an invalid ID is given")
 		}

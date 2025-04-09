@@ -18,16 +18,16 @@ type GetAllTodosResponse struct {
 }
 
 type GetTodoByIDRequest struct {
-	ID int `json:"id" validate:"min=0"`
+	ID int `json:"id" validate:"required"`
 }
 
 type GetTodoByIDResponse Todo
 
 type UpdateTodoRequest struct {
-	ID      int    `json:"id" validate:"min=0"`
+	ID      int    `json:"id" validate:"required"`
 	Content string `json:"content" validate:"required"`
 }
 
 type DeleteTodoByIDRequest struct {
-	ID int `json:"id" validate:"min=0"`
+	ID int `json:"id" validate:"required"`
 }
