@@ -37,8 +37,8 @@ func (ro *todoRouter) handleTodoByID(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		ro.controller.GetTodoByID(w, r)
 
-	case http.MethodPut:
-		ro.controller.UpdateTodo(w, r)
+	case http.MethodPatch:
+		ro.controller.UpdateTodoByID(w, r)
 
 	case http.MethodDelete:
 		ro.controller.DeleteTodoByID(w, r)

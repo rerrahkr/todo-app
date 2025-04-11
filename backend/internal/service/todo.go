@@ -6,10 +6,10 @@ import (
 )
 
 type TodoService interface {
-	NewTodo(req *NewTodoRequest) error
+	NewTodo(req *NewTodoRequest) (*NewTodoResponse, error)
 	GetAllTodos() (*GetAllTodosResponse, error)
 	GetTodoByID(req *GetTodoByIDRequest) (*GetTodoByIDResponse, error)
-	UpdateTodo(req *UpdateTodoRequest) error
+	UpdateTodo(req *UpdateTodoRequest) (*UpdateTodoResponse, error)
 	DeleteTodoByID(req *DeleteTodoByIDRequest) error
 }
 
@@ -23,14 +23,24 @@ func NewTodoService(repo repository.TodoRepository) TodoService {
 	}
 }
 
-func (s *todoService) NewTodo(req *NewTodoRequest) error {
+func (s *todoService) NewTodo(req *NewTodoRequest) (*NewTodoResponse, error) {
 	todo := &model.Todo{
 		Content: req.Content,
 	}
 
-	_, err := s.todoRepo.NewTodo(todo)
+	newTodo, err := s.todoRepo.NewTodo(todo)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	res := &NewTodoResponse{
+		ID:        newTodo.ID,
+		Content:   newTodo.Content,
+		CreatedAt: newTodo.CreatedAt,
+		UpdatedAt: newTodo.UpdatedAt,
+	}
+
+	return res, nil
 }
 
 func (s *todoService) GetAllTodos() (*GetAllTodosResponse, error) {
@@ -66,15 +76,25 @@ func (s *todoService) GetTodoByID(req *GetTodoByIDRequest) (*GetTodoByIDResponse
 	}, nil
 }
 
-func (s *todoService) UpdateTodo(req *UpdateTodoRequest) error {
+func (s *todoService) UpdateTodo(req *UpdateTodoRequest) (*UpdateTodoResponse, error) {
 	todo := &model.Todo{
 		ID:      req.ID,
 		Content: req.Content,
 	}
 
-	_, err := s.todoRepo.UpdateTodo(todo)
+	updatedTodo, err := s.todoRepo.UpdateTodo(todo)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	res := &UpdateTodoResponse{
+		ID:        updatedTodo.ID,
+		Content:   updatedTodo.Content,
+		CreatedAt: updatedTodo.CreatedAt,
+		UpdatedAt: updatedTodo.UpdatedAt,
+	}
+
+	return res, nil
 }
 
 func (s *todoService) DeleteTodoByID(req *DeleteTodoByIDRequest) error {

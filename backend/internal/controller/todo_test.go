@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,12 +17,12 @@ var expectedTodos = []service.Todo{
 	{ID: 2, Content: "B"},
 }
 
-func (s *TodoServiceMock) NewTodo(req *service.NewTodoRequest) error {
+func (s *TodoServiceMock) NewTodo(req *service.NewTodoRequest) (*service.NewTodoResponse, error) {
 	if req.Content != "New" {
-		return errors.New("Unexpected content")
+		return nil, errors.New("Unexpected content")
 	}
 
-	return nil
+	return &service.NewTodoResponse{Content: req.Content}, nil
 }
 
 func (*TodoServiceMock) GetAllTodos() (*service.GetAllTodosResponse, error) {
@@ -40,12 +39,12 @@ func (*TodoServiceMock) GetTodoByID(req *service.GetTodoByIDRequest) (*service.G
 	return &service.GetTodoByIDResponse{ID: 1, Content: "A"}, nil
 }
 
-func (*TodoServiceMock) UpdateTodo(req *service.UpdateTodoRequest) error {
+func (*TodoServiceMock) UpdateTodo(req *service.UpdateTodoRequest) (*service.UpdateTodoResponse, error) {
 	if req.ID != 1 {
-		return errors.New("")
+		return nil, errors.New("")
 	}
 
-	return nil
+	return &service.UpdateTodoResponse{ID: req.ID, Content: req.Content}, nil
 }
 
 func (*TodoServiceMock) DeleteTodoByID(req *service.DeleteTodoByIDRequest) error {
@@ -57,31 +56,6 @@ func (*TodoServiceMock) DeleteTodoByID(req *service.DeleteTodoByIDRequest) error
 }
 
 var controller TodoController
-
-func verifyTodosResponse(w *httptest.ResponseRecorder) error {
-	if w.Header().Get("Content-Type") != "application/json" {
-		return errors.New("Content-Type is not application/json")
-	}
-
-	res := &service.GetAllTodosResponse{}
-	if err := json.Unmarshal(w.Body.Bytes(), res); err != nil {
-		return errors.New("Invalid response body")
-	}
-
-	if len(res.Todos) != len(expectedTodos) {
-		return fmt.Errorf("Count of todos is %v but actual is %v", len(expectedTodos), len(res.Todos))
-	}
-
-	for i, todo := range res.Todos {
-		if todo.ID != expectedTodos[i].ID {
-			return fmt.Errorf("ID of todo[%v] is %v but actual is %v", i, expectedTodos[i].ID, todo.ID)
-		} else if todo.Content != expectedTodos[i].Content {
-			return fmt.Errorf("Content of todo[%v] is %v but actual is %v", i, expectedTodos[i].Content, todo.Content)
-		}
-	}
-
-	return nil
-}
 
 func TestMain(m *testing.M) {
 	// Preprocess.
@@ -105,8 +79,17 @@ func TestNewTodo(t *testing.T) {
 		t.Fatalf("Failed in TodoController.NewTodo: Status code is %v", w.Code)
 	}
 
-	if err := verifyTodosResponse(w); err != nil {
-		t.Fatalf("Failed in TodoController.NewTodo: %v", err)
+	if w.Header().Get("Content-Type") != "application/json" {
+		t.Fatal("Failed in TodoController.NewTodo: Content-Type is not application/json")
+	}
+
+	res := &service.NewTodoResponse{}
+	if err := json.Unmarshal(w.Body.Bytes(), res); err != nil {
+		t.Fatal("Failed in TodoController.NewTodo: Invalid response body")
+	}
+
+	if res.Content != body["content"] {
+		t.Errorf("Failed in TodoController.NewTodo: Content of todo is %v but actual is %v", body["content"], res.Content)
 	}
 }
 
@@ -120,8 +103,25 @@ func TestGetAllTodos(t *testing.T) {
 		t.Fatalf("Failed in TodoController.GetAllTodos: Status code is %v", w.Code)
 	}
 
-	if err := verifyTodosResponse(w); err != nil {
-		t.Fatalf("Failed in TodoController.GetAllTodos: %v", err)
+	if w.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Failed in TodoController.GetAllTodos: Content-Type is not application/json")
+	}
+
+	res := &service.GetAllTodosResponse{}
+	if err := json.Unmarshal(w.Body.Bytes(), res); err != nil {
+		t.Fatalf("Failed in TodoController.GetAllTodos: Invalid response body")
+	}
+
+	if len(res.Todos) != len(expectedTodos) {
+		t.Fatalf("Failed in TodoController.GetAllTodos: Count of todos is %v but actual is %v", len(expectedTodos), len(res.Todos))
+	}
+
+	for i, todo := range res.Todos {
+		if todo.ID != expectedTodos[i].ID {
+			t.Errorf("Failed in TodoController.GetAllTodos: ID of todo[%v] is %v but actual is %v", i, expectedTodos[i].ID, todo.ID)
+		} else if todo.Content != expectedTodos[i].Content {
+			t.Errorf("Failed in TodoController.GetAllTodos: Content of todo[%v] is %v but actual is %v", i, expectedTodos[i].Content, todo.Content)
+		}
 	}
 }
 
@@ -146,9 +146,10 @@ func TestGetTodoByID(t *testing.T) {
 		}
 
 		if res.ID != 1 {
-			t.Fatalf("Failed in TodoController.GetTodoByID: ID of todo is %v but actual is %v", 1, res.ID)
-		} else if res.Content != "A" {
-			t.Fatalf("Failed in TodoController.GetTodoByID: Content of todo is %v but actual is %v", "A", res.Content)
+			t.Errorf("Failed in TodoController.GetTodoByID: ID of todo is %v but actual is %v", 1, res.ID)
+		}
+		if res.Content != "A" {
+			t.Errorf("Failed in TodoController.GetTodoByID: Content of todo is %v but actual is %v", "A", res.Content)
 		}
 	})
 
@@ -165,43 +166,51 @@ func TestGetTodoByID(t *testing.T) {
 }
 
 func TestUpdateTodo(t *testing.T) {
-	t.Run("Valid ID", func(t *testing.T) {
+	t.Run("Existed ID", func(t *testing.T) {
 		body := map[string]string{
 			"content": "New",
 		}
 		jsonBody, _ := json.Marshal(body)
-		req := httptest.NewRequest(http.MethodPut, "/todos/1", bytes.NewReader(jsonBody))
+		req := httptest.NewRequest(http.MethodPatch, "/todos/1", bytes.NewReader(jsonBody))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 
-		controller.UpdateTodo(w, req)
+		controller.UpdateTodoByID(w, req)
 
 		if w.Code != http.StatusOK {
 			t.Fatalf("Failed in TodoController.UpdateTodo: Status code is %v", w.Code)
 		}
 
-		if err := verifyTodosResponse(w); err != nil {
-			t.Fatalf("Failed in TodoController.UpdateTodo: %v", err)
+		if w.Header().Get("Content-Type") != "application/json" {
+			t.Fatal("Failed in TodoController.UpdateTodo: Content-Type is not application/json")
+		}
+
+		res := &service.UpdateTodoResponse{}
+		if err := json.Unmarshal(w.Body.Bytes(), res); err != nil {
+			t.Fatal("Failed in TodoController.UpdateTodo: Invalid response body")
+		}
+
+		if res.ID != 1 {
+			t.Errorf("Failed in TodoController.UpdateTodo: ID of todo is %v but actual is %v", 1, res.ID)
+		}
+		if res.Content != body["content"] {
+			t.Errorf("Failed in TodoController.UpdateTodo: Content of todo is %v but actual is %v", body["content"], res.Content)
 		}
 	})
 
-	t.Run("Invalid ID", func(t *testing.T) {
+	t.Run("Non-existed ID", func(t *testing.T) {
 		body := map[string]string{
 			"content": "New",
 		}
 		jsonBody, _ := json.Marshal(body)
-		req := httptest.NewRequest(http.MethodPut, "/todos/2", bytes.NewReader(jsonBody))
+		req := httptest.NewRequest(http.MethodPatch, "/todos/2", bytes.NewReader(jsonBody))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 
-		controller.UpdateTodo(w, req)
+		controller.UpdateTodoByID(w, req)
 
-		if w.Code != http.StatusCreated {
+		if w.Code != http.StatusNotFound {
 			t.Fatalf("Failed in TodoController.UpdateTodo: Status code is %v", w.Code)
-		}
-
-		if err := verifyTodosResponse(w); err != nil {
-			t.Fatalf("Failed in TodoController.UpdateTodo: %v", err)
 		}
 	})
 }
@@ -215,10 +224,6 @@ func TestDeleteTodoByID(t *testing.T) {
 
 		if w.Code != http.StatusOK {
 			t.Fatalf("Failed in TodoController.DeleteTodo: Status code is %v", w.Code)
-		}
-
-		if err := verifyTodosResponse(w); err != nil {
-			t.Fatalf("Failed in TodoController.DeleteTodo: %v", err)
 		}
 	})
 

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"todoapp-backend/internal/model"
@@ -85,7 +86,29 @@ func (*todoRepository) UpdateTodo(todo *model.Todo) (*model.Todo, error) {
 }
 
 func (*todoRepository) DeleteTodoByID(id int) error {
-	cmd := `DELETE FROM todos WHERE id = $1`
-	_, err := pool.Exec(context.Background(), cmd, id)
-	return err
+	tx, err := pool.Begin(context.Background())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(context.Background())
+
+	cmd := `SELECT EXISTS(SELECT 1 FROM todos WHERE id = $1)`
+	var exists bool
+	if err := tx.QueryRow(context.Background(), cmd, id).Scan(&exists); err != nil {
+		return err
+	}
+	if !exists {
+		return errors.New("todo was not found")
+	}
+
+	cmd = `DELETE FROM todos WHERE id = $1`
+	if _, err := pool.Exec(context.Background(), cmd, id); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(context.Background()); err != nil {
+		return err
+	}
+
+	return nil
 }

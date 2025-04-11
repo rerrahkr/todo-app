@@ -16,7 +16,7 @@ type TodoController interface {
 	NewTodo(w http.ResponseWriter, r *http.Request)
 	GetAllTodos(w http.ResponseWriter, r *http.Request)
 	GetTodoByID(w http.ResponseWriter, r *http.Request)
-	UpdateTodo(w http.ResponseWriter, r *http.Request)
+	UpdateTodoByID(w http.ResponseWriter, r *http.Request)
 	DeleteTodoByID(w http.ResponseWriter, r *http.Request)
 }
 
@@ -45,27 +45,22 @@ func (c *todoController) NewTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = validator.New(validator.WithRequiredStructEnabled()).Struct(req); err != nil {
+	if err := validator.New(validator.WithRequiredStructEnabled()).Struct(req); err != nil {
 		http.Error(w, "Failed to create todo", http.StatusBadRequest)
 		return
 	}
 
-	if err := c.todoService.NewTodo(req); err != nil {
+	res, err := c.todoService.NewTodo(req)
+	if err != nil {
 		http.Error(w, "Failed to create todo", http.StatusInternalServerError)
 		return
 	}
 
-	res, err := c.todoService.GetAllTodos()
-	if err != nil {
-		http.Error(w, "Failed to get all todos", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		http.Error(w, "Failed to get all todos", http.StatusInternalServerError)
+		http.Error(w, "Failed to create todo", http.StatusInternalServerError)
 		return
 	}
 }
@@ -77,8 +72,8 @@ func (c *todoController) GetAllTodos(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
 		http.Error(w, "Failed to get all todos", http.StatusInternalServerError)
@@ -110,8 +105,8 @@ func (c *todoController) GetTodoByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
 		http.Error(w, "Failed to get todo", http.StatusInternalServerError)
@@ -119,7 +114,7 @@ func (c *todoController) GetTodoByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *todoController) UpdateTodo(w http.ResponseWriter, r *http.Request) {
+func (c *todoController) UpdateTodoByID(w http.ResponseWriter, r *http.Request) {
 	id, err := parseID(r.URL.Path)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
@@ -140,33 +135,22 @@ func (c *todoController) UpdateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	req.ID = id
 
-	if err = validator.New(validator.WithRequiredStructEnabled()).Struct(req); err != nil {
+	if err := validator.New(validator.WithRequiredStructEnabled()).Struct(req); err != nil {
 		http.Error(w, "Failed to update todo", http.StatusBadRequest)
 		return
 	}
 
-	if err := c.todoService.UpdateTodo(req); err != nil {
-		// Try to create a new todo.
-		if err := c.todoService.NewTodo(&service.NewTodoRequest{Content: req.Content}); err != nil {
-			http.Error(w, "Failed to update todo", http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusCreated)
-	} else {
-		w.WriteHeader(http.StatusOK)
-	}
-
-	res, err := c.todoService.GetAllTodos()
+	res, err := c.todoService.UpdateTodo(req)
 	if err != nil {
-		http.Error(w, "Failed to get all todos", http.StatusInternalServerError)
+		http.Error(w, "Failed to update todo", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		http.Error(w, "Failed to get all todos", http.StatusInternalServerError)
+		http.Error(w, "Failed to update todo", http.StatusInternalServerError)
 		return
 	}
 }
@@ -184,17 +168,5 @@ func (c *todoController) DeleteTodoByID(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	res, err := c.todoService.GetAllTodos()
-	if err != nil {
-		http.Error(w, "Failed to get all todos", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(res)
-	if err != nil {
-		http.Error(w, "Failed to get all todos", http.StatusInternalServerError)
-		return
-	}
+	w.WriteHeader(http.StatusNoContent)
 }

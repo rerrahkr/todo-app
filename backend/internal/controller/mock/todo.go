@@ -88,14 +88,14 @@ func (mr *TodoControllerMockMockRecorder) NewTodo(w, r any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewTodo", reflect.TypeOf((*TodoControllerMock)(nil).NewTodo), w, r)
 }
 
-// UpdateTodo mocks base method.
-func (m *TodoControllerMock) UpdateTodo(w http.ResponseWriter, r *http.Request) {
+// UpdateTodoByID mocks base method.
+func (m *TodoControllerMock) UpdateTodoByID(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "UpdateTodo", w, r)
+	m.ctrl.Call(m, "UpdateTodoByID", w, r)
 }
 
-// UpdateTodo indicates an expected call of UpdateTodo.
-func (mr *TodoControllerMockMockRecorder) UpdateTodo(w, r any) *gomock.Call {
+// UpdateTodoByID indicates an expected call of UpdateTodoByID.
+func (mr *TodoControllerMockMockRecorder) UpdateTodoByID(w, r any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTodo", reflect.TypeOf((*TodoControllerMock)(nil).UpdateTodo), w, r)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTodoByID", reflect.TypeOf((*TodoControllerMock)(nil).UpdateTodoByID), w, r)
 }

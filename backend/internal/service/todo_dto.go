@@ -13,6 +13,8 @@ type NewTodoRequest struct {
 	Content string `json:"content" validate:"required"`
 }
 
+type NewTodoResponse Todo
+
 type GetAllTodosResponse struct {
 	Todos []Todo `json:"todos"`
 }
@@ -27,6 +29,8 @@ type UpdateTodoRequest struct {
 	ID      int    `json:"id" validate:"required"`
 	Content string `json:"content" validate:"required"`
 }
+
+type UpdateTodoResponse Todo
 
 type DeleteTodoByIDRequest struct {
 	ID int `json:"id" validate:"required"`

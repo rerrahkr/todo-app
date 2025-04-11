@@ -57,17 +57,17 @@ func TestGetTodoByID(t *testing.T) {
 	handler.ServeHTTP(w, req)
 }
 
-func TestUpdateTodo(t *testing.T) {
+func TestUpdateTodoByID(t *testing.T) {
 	mc := gomock.NewController(t)
 	defer mc.Finish()
 
 	mockController := controller_mock.NewTodoControllerMock(mc)
-	mockController.EXPECT().UpdateTodo(gomock.Any(), gomock.Any()).Times(1)
+	mockController.EXPECT().UpdateTodoByID(gomock.Any(), gomock.Any()).Times(1)
 
 	router := NewTodoRouter(mockController)
 	handler := router.SetupRoutes()
 
-	req := httptest.NewRequest(http.MethodPut, "/todos/0", nil)
+	req := httptest.NewRequest(http.MethodPatch, "/todos/0", nil)
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, req)

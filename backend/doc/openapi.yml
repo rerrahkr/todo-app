@@ -46,11 +46,11 @@ paths:
                   example: "Study API server with Go"
       responses:
         "201":
-          description: A list of all todos.
+          description: Todo created successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Todos"
+                $ref: "#/components/schemas/Todo"
 
   /todos/{id}:
     get:
@@ -75,7 +75,7 @@ paths:
         "404":
           description: Todo was not found.
 
-    put:
+    patch:
       summary: Update a todo by ID.
       description: Update a specific todo item by its ID.
       tags:
@@ -100,17 +100,13 @@ paths:
                   example: "Study API server with Go"
       responses:
         "200":
-          description: Updated Todo successfully. Returns all todos.
+          description: Updated Todo successfully. Returns updated todo.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Todos"
-        "201":
-          description: Created Todo successfully. Returns all todos.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Todos"
+                $ref: "#/components/schemas/Todo"
+        "404":
+          description: Todo was not found.
 
     delete:
       summary: Delete a todo by ID.
@@ -125,14 +121,10 @@ paths:
           schema:
             type: integer
       responses:
-        "200":
-          description: Deleted Todo successfully. Returns all todos.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Todos"
+        "204":
+          description: Deleted Todo successfully.
         "404":
-          description: Todo not found.
+          description: Todo was not found.
 
 components:
   schemas:

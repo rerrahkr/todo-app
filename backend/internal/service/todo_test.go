@@ -37,7 +37,7 @@ func (s *TodoRepositoryStub) UpdateTodo(todo *model.Todo) (*model.Todo, error) {
 		return nil, errors.New("")
 	}
 
-	return &model.Todo{ID: td.ID, Content: td.Content}, nil
+	return &model.Todo{ID: td.ID, Content: todo.Content}, nil
 }
 
 func (s *TodoRepositoryStub) DeleteTodoByID(id int) error {
@@ -60,9 +60,13 @@ func TestMain(m *testing.M) {
 func TestNewTodo(t *testing.T) {
 	req := NewTodoRequest{"New!"}
 
-	err := service.NewTodo(&req)
+	res, err := service.NewTodo(&req)
 	if err != nil {
 		t.Fatalf("Failed in TodoService.NewTodo: %v", err)
+	}
+
+	if res.Content != req.Content {
+		t.Fatalf("Failed in TodoService.NewTodo: Content of response is expected %v but actual %v", req.Content, res.Content)
 	}
 }
 
@@ -118,14 +122,24 @@ func TestGetTodoByID(t *testing.T) {
 func TestUpdateTodo(t *testing.T) {
 	t.Run("Give a valid ID", func(t *testing.T) {
 		req := UpdateTodoRequest{ID: 1, Content: "ABC"}
-		if err := service.UpdateTodo(&req); err != nil {
+		res, err := service.UpdateTodo(&req)
+
+		if err != nil {
 			t.Fatalf("Failed in TodoService.UpdateTodo: %v", err)
+		}
+
+		if res.ID != req.ID {
+			t.Errorf("Failed in TodoService.UpdateTodo: ID of Response is expected %v but actual %v", req.ID, res.ID)
+		}
+
+		if res.Content != req.Content {
+			t.Errorf("Failed in TodoService.UpdateTodo: Content of Response is expected %v but actual %v", req.Content, res.Content)
 		}
 	})
 
 	t.Run("Give an invalid ID", func(t *testing.T) {
 		req := UpdateTodoRequest{ID: 2}
-		if err := service.UpdateTodo(&req); err == nil {
+		if _, err := service.UpdateTodo(&req); err == nil {
 			t.Fatal("Failed in TodoService.UpdateTodo: No error occurs when an invalid ID is given")
 		}
 	})
