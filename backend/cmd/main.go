@@ -3,17 +3,25 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"strconv"
 
+	"todoapp-backend/internal/controller"
 	"todoapp-backend/internal/logger"
-	"todoapp-backend/internal/model"
 	"todoapp-backend/internal/repository"
+	"todoapp-backend/internal/router"
+	"todoapp-backend/internal/service"
 
 	"github.com/joho/godotenv"
 )
 
+type APIConfig struct {
+	Port int
+}
+
 // Get database configuration from .env file.
-func loadEnv() *repository.Config {
+func loadEnv() (*repository.Config, *APIConfig) {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Panicln("Error loading .env file")
@@ -23,17 +31,24 @@ func loadEnv() *repository.Config {
 
 	dbConfig.URI = os.Getenv("POSTGRES_URI")
 	if dbConfig.URI == "" {
-		log.Panicln("\"POSTGRES_URI\" not set in .env file")
+		log.Panicln(`"POSTGRES_URI" not set in .env file`)
 	}
 
-	return dbConfig
+	apiConfig := &APIConfig{}
+
+	apiConfig.Port, err = strconv.Atoi(os.Getenv("BACKEND_PORT"))
+	if err != nil {
+		log.Panicln(`"BACKEND_PORT" not set in .env file`)
+	}
+
+	return dbConfig, apiConfig
 }
 
 func main() {
 	logger.Setup()
 	defer logger.Cleanup()
 
-	dbConfig := loadEnv()
+	dbConfig, apiConfig := loadEnv()
 	log.Println("Loaded .env file")
 
 	if err := repository.Connect(dbConfig); err != nil {
@@ -50,50 +65,12 @@ func main() {
 		log.Panicln("Unable to ping database:", err)
 	}
 
-	todoRepository := repository.NewTodoRepository()
+	repository := repository.NewTodoRepository()
+	service := service.NewTodoService(repository)
+	controller := controller.NewTodoController(service)
 
-	todos, err := todoRepository.GetAllTodos()
-	if err != nil {
-		log.Panicln("Error getting todos:", err)
-	}
+	router := router.NewTodoRouter(controller)
+	handler := router.SetupRoutes()
 
-	fmt.Println(todos)
-
-	_, err = todoRepository.NewTodo(&model.Todo{Content: fmt.Sprintf("Task %v", len(todos)+1)})
-	if err != nil {
-		log.Panicln("Error creating todo:", err)
-	}
-
-	todos, err = todoRepository.GetAllTodos()
-	if err != nil {
-		log.Panicln("Error getting todos:", err)
-	}
-
-	fmt.Println(todos)
-
-	_, err = todoRepository.UpdateTodo(&model.Todo{ID: len(todos), Content: "Updated"})
-	if err != nil {
-		log.Panicln("Error updating todo:", err)
-	}
-
-	todos, err = todoRepository.GetAllTodos()
-	if err != nil {
-		log.Panicln("Error getting todos:", err)
-	}
-
-	fmt.Println(todos)
-
-	err = todoRepository.DeleteTodoByID(len(todos))
-	if err != nil {
-		log.Panicln("Error deleting todo:", err)
-	}
-
-	todos, err = todoRepository.GetAllTodos()
-	if err != nil {
-		log.Panicln("Error getting todos:", err)
-	}
-
-	fmt.Println(todos)
-
-	fmt.Println("Hello, World!")
+	http.ListenAndServe(fmt.Sprintf(":%d", apiConfig.Port), handler)
 }
