@@ -4,52 +4,31 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 
 	"todoapp-backend/internal/controller"
+	"todoapp-backend/internal/env"
 	"todoapp-backend/internal/logger"
 	"todoapp-backend/internal/repository"
 	"todoapp-backend/internal/router"
 	"todoapp-backend/internal/service"
-
-	"github.com/joho/godotenv"
 )
-
-type APIConfig struct {
-	Port int
-}
-
-// Get database configuration from .env file.
-func loadEnv() (*repository.Config, *APIConfig) {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Panicln("Error loading .env file")
-	}
-
-	dbConfig := &repository.Config{}
-
-	dbConfig.URI = os.Getenv("POSTGRES_URI")
-	if dbConfig.URI == "" {
-		log.Panicln(`"POSTGRES_URI" not set in .env file`)
-	}
-
-	apiConfig := &APIConfig{}
-
-	apiConfig.Port, err = strconv.Atoi(os.Getenv("BACKEND_PORT"))
-	if err != nil {
-		log.Panicln(`"BACKEND_PORT" not set in .env file`)
-	}
-
-	return dbConfig, apiConfig
-}
 
 func main() {
 	logger.Setup()
 	defer logger.Cleanup()
 
-	dbConfig, apiConfig := loadEnv()
-	log.Println("Loaded .env file")
+	dbConfig := &repository.Config{}
+
+	var err error
+	dbConfig.URI, err = env.GetDBURI()
+	if err != nil {
+		log.Panicln("Error getting database URI:", err)
+	}
+
+	apiPort, err := env.GetAPIPort()
+	if err != nil {
+		log.Panicln("Error getting API port:", err)
+	}
 
 	if err := repository.Connect(dbConfig); err != nil {
 		log.Panicln("Error connecting to database:", err)
@@ -72,5 +51,5 @@ func main() {
 	router := router.NewTodoRouter(controller)
 	handler := router.SetupRoutes()
 
-	http.ListenAndServe(fmt.Sprintf(":%d", apiConfig.Port), handler)
+	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", apiPort), handler))
 }
