@@ -1,5 +1,5 @@
 import type { Todo } from "@/types/todo";
-import Masonry from "@mui/lab/Masonry";
+import Masonry, { type MasonryProps } from "@mui/lab/Masonry";
 import type React from "react";
 import { CardItem, type CardItemProps } from "./CardItem";
 
@@ -7,8 +7,8 @@ type TodoListProps = {
   todos: Todo[];
   onCheckItem: CardItemProps["onCheck"];
   onClickItem: CardItemProps["onClick"];
-  columns?: number;
-  spacing?: number;
+  columns?: MasonryProps["columns"];
+  spacing?: MasonryProps["spacing"];
 };
 
 export function TodoList({
