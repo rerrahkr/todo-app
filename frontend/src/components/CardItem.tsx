@@ -7,41 +7,41 @@ import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 export type CardItemProps = {
-	cardId: number;
-	content: string;
-	onCheck: (id: number) => void;
-	onClick: (id: number) => void;
-	sx?: SxProps<Theme>;
+  cardId: number;
+  content: string;
+  onCheck: (id: number) => void;
+  onClick: (id: number) => void;
+  sx?: SxProps<Theme>;
 };
 
 export function CardItem({
-	cardId,
-	content,
-	onCheck,
-	onClick,
-	sx,
+  cardId,
+  content,
+  onCheck,
+  onClick,
+  sx,
 }: CardItemProps): React.JSX.Element {
-	return (
-		<Card
-			sx={{
-				...sx,
-				display: "flex",
-			}}
-		>
-			<CardActions
-				sx={{
-					display: "flex",
-					flexDirection: "column",
-					justifyContent: "center",
-				}}
-			>
-				<Checkbox onChange={() => onCheck(cardId)} />
-			</CardActions>
-			<CardActionArea onClick={() => onClick(cardId)}>
-				<CardContent>
-					<Typography variant="body1">{content}</Typography>
-				</CardContent>
-			</CardActionArea>
-		</Card>
-	);
+  return (
+    <Card
+      sx={{
+        ...sx,
+        display: "flex",
+      }}
+    >
+      <CardActions
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <Checkbox onChange={() => onCheck(cardId)} />
+      </CardActions>
+      <CardActionArea onClick={() => onClick(cardId)}>
+        <CardContent>
+          <Typography variant="body1">{content}</Typography>
+        </CardContent>
+      </CardActionArea>
+    </Card>
+  );
 }
