@@ -1,4 +1,7 @@
-import type { Todo } from "@/types/todo";
+import {
+  type TodoEditableFields,
+  todoEditableFieldsSchema,
+} from "@/types/todo";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -7,22 +10,21 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import type React from "react";
 import { useState, useTransition } from "react";
-import { z } from "zod";
-
-const editTodoPayloadSchema = z.object({
-  content: z.string().min(1),
-});
 
 export type EditTodoDialogProps = {
-  todo: Todo;
   open: boolean;
+  onSubmit: (fields: TodoEditableFields) => Promise<void>;
   onClose: () => void;
+  title: string;
+  defaults?: TodoEditableFields;
 };
 
 export function EditTodoDialog({
-  todo,
   open,
+  onSubmit,
   onClose,
+  title,
+  defaults = { content: "" },
 }: EditTodoDialogProps): React.JSX.Element {
   const [failedValidation, setFailedValidation] = useState<boolean>(false);
 
@@ -33,16 +35,16 @@ export function EditTodoDialog({
     startTransition(async () => {
       const formData = new FormData(e.currentTarget);
       const formObject = Object.fromEntries(formData.entries());
-      const parseResult = editTodoPayloadSchema.safeParse(formObject);
+      const parseResult = todoEditableFieldsSchema.safeParse(formObject);
 
       if (!parseResult.success) {
         setFailedValidation(true);
         return;
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       setFailedValidation(false);
+
+      await onSubmit(parseResult.data);
+
       onClose();
     });
   }
@@ -52,14 +54,14 @@ export function EditTodoDialog({
   return (
     <Dialog open={open} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <DialogTitle>Edit Todo Item</DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <TextField
             id="content"
             label="Content"
             name="content"
             variant="standard"
-            defaultValue={todo.content}
+            defaultValue={defaults.content}
             error={hasError}
             helperText={hasError && "Invalid content."}
             disabled={isPending}

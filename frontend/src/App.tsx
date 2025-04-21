@@ -1,6 +1,6 @@
 import { EditTodoDialog } from "@/components/EditTodoDialog";
 import { TodoList } from "@/components/TodoList";
-import type { Todo } from "@/types/todo";
+import type { Todo, TodoEditableFields } from "@/types/todo";
 import AddIcon from "@mui/icons-material/Add";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -23,22 +23,53 @@ const TODOS: Todo[] = [...range(1, 20)].map(
   })
 );
 
+type DialogOpenStatus = {
+  state: "closed" | "openNew" | "openEdit";
+  title: string;
+};
+
 function App(): React.JSX.Element {
   const [todo, setTodo] = useState<Todo>();
 
-  const [dialogIsOpened, setDialogIsOpened] = useState<boolean>(false);
-
-  function handleItemChecked(cardId: number) {}
+  const [dialogOpenStatus, setDialogOpenStatus] = useState<DialogOpenStatus>({
+    state: "closed",
+    title: "",
+  });
 
   function handleItemClicked(cardId: number) {
     setTodo(TODOS.find((todo) => todo.id === cardId));
-    setDialogIsOpened(true);
+    setDialogOpenStatus({
+      state: "openEdit",
+      title: "Edit Todo Item",
+    });
   }
 
-  function handleAddClicked() {}
+  function handleAddClicked() {
+    setDialogOpenStatus({
+      state: "openNew",
+      title: "Create Todo Item",
+    });
+  }
 
   function handleClosedDialog() {
-    setDialogIsOpened(false);
+    setDialogOpenStatus((prev) => ({
+      state: "closed",
+      title: prev.title,
+    }));
+  }
+
+  async function handleSubmitCreateTodo(fields: TodoEditableFields) {
+    console.log("create");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  async function handleSubmitEditTodo(fields: TodoEditableFields) {
+    console.log("update");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  async function handleItemChecked(cardId: number) {
+    console.log("delete");
   }
 
   return (
@@ -70,13 +101,25 @@ function App(): React.JSX.Element {
           <AddIcon />
         </Fab>
       </Container>
-      {todo && (
-        <EditTodoDialog
-          todo={todo}
-          open={dialogIsOpened}
-          onClose={handleClosedDialog}
-        />
-      )}
+      <EditTodoDialog
+        onClose={handleClosedDialog}
+        open={dialogOpenStatus.state !== "closed"}
+        onSubmit={
+          dialogOpenStatus.state === "openEdit"
+            ? handleSubmitEditTodo
+            : handleSubmitCreateTodo
+        }
+        title={dialogOpenStatus.title}
+        defaults={
+          todo && dialogOpenStatus.state === "openEdit"
+            ? {
+                content: todo.content,
+              }
+            : {
+                content: "",
+              }
+        }
+      />
     </>
   );
 }
