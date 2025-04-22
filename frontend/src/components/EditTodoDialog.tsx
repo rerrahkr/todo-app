@@ -61,6 +61,7 @@ export function EditTodoDialog({
             label="Content"
             name="content"
             variant="standard"
+            multiline
             defaultValue={defaults.content}
             error={hasError}
             helperText={hasError && "Invalid content."}

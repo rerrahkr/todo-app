@@ -39,7 +39,9 @@ export function CardItem({
       </CardActions>
       <CardActionArea onClick={() => onClick(cardId)}>
         <CardContent>
-          <Typography variant="body1">{content}</Typography>
+          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+            {content}
+          </Typography>
         </CardContent>
       </CardActionArea>
     </Card>
