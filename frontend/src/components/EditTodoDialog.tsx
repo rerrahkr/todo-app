@@ -9,7 +9,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import type React from "react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 export type EditTodoDialogProps = {
   open: boolean;
@@ -27,6 +27,13 @@ export function EditTodoDialog({
   defaults = { content: "" },
 }: EditTodoDialogProps): React.JSX.Element {
   const [failedValidation, setFailedValidation] = useState<boolean>(false);
+
+  // Reset validation state after dialog is opened.
+  useEffect(() => {
+    if (open) {
+      setFailedValidation(false);
+    }
+  }, [open]);
 
   const [isPending, startTransition] = useTransition();
 
