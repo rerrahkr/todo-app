@@ -14,15 +14,6 @@ function* range(begin: number, end: number, step = 1): Generator<number> {
   }
 }
 
-const TODOS: Todo[] = [...range(1, 20)].map(
-  (i): Todo => ({
-    id: i,
-    content: `Todo ${i}`,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  })
-);
-
 type DialogOpenStatus = {
   state: "closed" | "openNew" | "openEdit";
   title: string;
@@ -31,13 +22,24 @@ type DialogOpenStatus = {
 function App(): React.JSX.Element {
   const [todo, setTodo] = useState<Todo>();
 
+  const [todos, setTodos] = useState<Todo[]>(
+    [...range(1, 20)].map(
+      (i): Todo => ({
+        id: i,
+        content: `Todo ${i}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    )
+  );
+
   const [dialogOpenStatus, setDialogOpenStatus] = useState<DialogOpenStatus>({
     state: "closed",
     title: "",
   });
 
   function handleItemClicked(cardId: number) {
-    setTodo(TODOS.find((todo) => todo.id === cardId));
+    setTodo(todos.find((todo) => todo.id === cardId));
     setDialogOpenStatus({
       state: "openEdit",
       title: "Edit Todo Item",
@@ -59,16 +61,42 @@ function App(): React.JSX.Element {
   }
 
   async function handleSubmitCreateTodo(fields: TodoEditableFields) {
+    setTodos((prev) => {
+      const newTodo: Todo = {
+        id: prev.length === 0 ? 1 : prev[prev.length - 1].id + 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ...fields,
+      };
+      return [...prev, newTodo];
+    });
+
     console.log("create");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   async function handleSubmitEditTodo(fields: TodoEditableFields) {
+    const cardId = todo?.id;
+    if (cardId == undefined) {
+      return;
+    }
+
+    setTodos((prev) => {
+      const i = prev.findIndex((todo) => todo.id === cardId);
+      if (i !== -1) {
+        prev[i] = {
+          ...prev[i],
+          ...fields,
+        };
+      }
+      return prev;
+    });
+
     console.log("update");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   async function handleItemChecked(cardId: number) {
+    setTodos((prev) => prev.filter((todo) => todo.id !== cardId));
+
     console.log("delete");
   }
 
@@ -77,7 +105,7 @@ function App(): React.JSX.Element {
       <CssBaseline />
       <Container sx={{ my: 4 }}>
         <TodoList
-          todos={TODOS}
+          todos={todos}
           onCheckItem={handleItemChecked}
           onClickItem={handleItemClicked}
           columns={{
