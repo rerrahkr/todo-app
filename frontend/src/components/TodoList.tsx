@@ -1,5 +1,7 @@
 import type { Todo } from "@/types/todo";
+import Grow from "@mui/material/Grow";
 import Masonry, { type MasonryProps } from "@mui/lab/Masonry";
+import { TransitionGroup } from "react-transition-group";
 import type React from "react";
 import { CardItem, type CardItemProps } from "./CardItem";
 
@@ -19,16 +21,19 @@ export function TodoList({
   spacing = 2,
 }: TodoListProps): React.JSX.Element {
   return (
-    <Masonry columns={columns} spacing={spacing}>
+    <TransitionGroup component={Masonry} columns={columns} spacing={spacing}>
       {todos.map((todo) => (
-        <CardItem
-          key={todo.id}
-          cardId={todo.id}
-          content={todo.content}
-          onCheck={onCheckItem}
-          onClick={onClickItem}
-        />
+        <Grow key={todo.id}>
+          <div>
+            <CardItem
+              cardId={todo.id}
+              content={todo.content}
+              onCheck={onCheckItem}
+              onClick={onClickItem}
+            />
+          </div>
+        </Grow>
       ))}
-    </Masonry>
+    </TransitionGroup>
   );
 }
