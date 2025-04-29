@@ -30,6 +30,11 @@ func main() {
 		log.Panicln("Error getting API port:", err)
 	}
 
+	frontendURI, err := env.GetFrontendURI()
+	if err != nil {
+		log.Panicln("Error getting frontend URI:", err)
+	}
+
 	if err := repository.Connect(dbConfig); err != nil {
 		log.Panicln("Error connecting to database:", err)
 	}
@@ -49,7 +54,7 @@ func main() {
 	controller := controller.NewTodoController(service)
 
 	router := router.NewTodoRouter(controller)
-	handler := router.SetupRoutes()
+	handler := router.SetupRoutes(frontendURI)
 
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", apiPort), handler))
 }

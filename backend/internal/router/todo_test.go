@@ -17,7 +17,7 @@ func TestNewTodo(t *testing.T) {
 	mockController.EXPECT().NewTodo(gomock.Any(), gomock.Any()).Times(1)
 
 	router := NewTodoRouter(mockController)
-	handler := router.SetupRoutes()
+	handler := router.SetupRoutes("*")
 
 	req := httptest.NewRequest(http.MethodPost, "/todos", nil)
 	w := httptest.NewRecorder()
@@ -33,7 +33,7 @@ func TestGetTodos(t *testing.T) {
 	mockController.EXPECT().GetAllTodos(gomock.Any(), gomock.Any()).Times(1)
 
 	router := NewTodoRouter(mockController)
-	handler := router.SetupRoutes()
+	handler := router.SetupRoutes("*")
 
 	req := httptest.NewRequest(http.MethodGet, "/todos", nil)
 	w := httptest.NewRecorder()
@@ -49,7 +49,7 @@ func TestGetTodoByID(t *testing.T) {
 	mockController.EXPECT().GetTodoByID(gomock.Any(), gomock.Any()).Times(1)
 
 	router := NewTodoRouter(mockController)
-	handler := router.SetupRoutes()
+	handler := router.SetupRoutes("*")
 
 	req := httptest.NewRequest(http.MethodGet, "/todos/0", nil)
 	w := httptest.NewRecorder()
@@ -65,7 +65,7 @@ func TestUpdateTodoByID(t *testing.T) {
 	mockController.EXPECT().UpdateTodoByID(gomock.Any(), gomock.Any()).Times(1)
 
 	router := NewTodoRouter(mockController)
-	handler := router.SetupRoutes()
+	handler := router.SetupRoutes("*")
 
 	req := httptest.NewRequest(http.MethodPatch, "/todos/0", nil)
 	w := httptest.NewRecorder()
@@ -81,7 +81,7 @@ func TestDeleteTodoByID(t *testing.T) {
 	mockController.EXPECT().DeleteTodoByID(gomock.Any(), gomock.Any()).Times(1)
 
 	router := NewTodoRouter(mockController)
-	handler := router.SetupRoutes()
+	handler := router.SetupRoutes("*")
 
 	req := httptest.NewRequest(http.MethodDelete, "/todos/0", nil)
 	w := httptest.NewRecorder()

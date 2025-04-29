@@ -3,10 +3,12 @@ package router
 import (
 	"net/http"
 	"todoapp-backend/internal/controller"
+
+	"github.com/rs/cors"
 )
 
 type TodoRouter interface {
-	SetupRoutes() http.Handler
+	SetupRoutes(allowedOrigin string) http.Handler
 }
 
 type todoRouter struct {
@@ -48,11 +50,17 @@ func (ro *todoRouter) handleTodoByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ro *todoRouter) SetupRoutes() http.Handler {
+func (ro *todoRouter) SetupRoutes(allowedOrigin string) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/todos", ro.handleTodos)
 	mux.HandleFunc("/todos/", ro.handleTodoByID)
 
-	return mux
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		// AllowCredentials: true,
+		AllowedMethods: []string{"GET", "POST", "PATCH", "DELETE"},
+	})
+
+	return c.Handler(mux)
 }

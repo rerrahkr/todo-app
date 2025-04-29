@@ -8,6 +8,7 @@ services:
     environment:
       POSTGRES_URI: ${POSTGRES_URI}
       BACKEND_PORT: ${BACKEND_PORT}
+      FRONTEND_URI: ${FRONTEND_URI}
     depends_on:
       database:
         condition: service_healthy

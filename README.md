@@ -10,4 +10,12 @@ You need to prepare an .env file with the following environment variables:
 POSTGRES_DB=dbname
 POSTGRES_USER=username
 POSTGRES_PASSWORD=password
+POSTGRES_PORT=5432
+POSTGRES_HOST=host
+POSTGRES_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+
+BACKEND_PORT=8080
+
+FRONTEND_PORT=5173
+FRONTEND_URI=http://localhost:${FRONTEND_PORT}
 ```

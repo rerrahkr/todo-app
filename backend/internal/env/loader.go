@@ -6,15 +6,16 @@ import (
 	"strconv"
 )
 
-func GetDBURI() (string, error) {
-	const envName = "POSTGRES_URI"
-
-	uri := os.Getenv(envName)
-	if uri == "" {
+func getEnvAsString(envName string) (string, error) {
+	value := os.Getenv(envName)
+	if value == "" {
 		return "", fmt.Errorf("%s not set in environment variables", envName)
 	}
+	return value, nil
+}
 
-	return uri, nil
+func GetDBURI() (string, error) {
+	return getEnvAsString("POSTGRES_URI")
 }
 
 func GetAPIPort() (int, error) {
@@ -26,4 +27,8 @@ func GetAPIPort() (int, error) {
 	}
 
 	return port, nil
+}
+
+func GetFrontendURI() (string, error) {
+	return getEnvAsString("FRONTEND_URI")
 }
