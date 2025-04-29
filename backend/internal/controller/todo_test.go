@@ -222,7 +222,7 @@ func TestDeleteTodoByID(t *testing.T) {
 
 		controller.DeleteTodoByID(w, req)
 
-		if w.Code != http.StatusOK {
+		if w.Code != http.StatusNoContent {
 			t.Fatalf("Failed in TodoController.DeleteTodo: Status code is %v", w.Code)
 		}
 	})
