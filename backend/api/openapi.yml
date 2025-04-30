@@ -141,9 +141,9 @@ components:
           type: string
           description: Main content of todo.
           example: "Study API server with Go"
-        created_at:
+        createdAt:
           type: string
           format: date-time
-        updated_at:
+        updatedAt:
           type: string
           format: date-time
