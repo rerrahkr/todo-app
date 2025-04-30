@@ -1,18 +1,19 @@
 import { EditTodoDialog } from "@/components/EditTodoDialog";
 import { TodoList } from "@/components/TodoList";
-import type { Todo, TodoEditableFields } from "@/types/todo";
+import {
+  GetTodosResponse,
+  getTodosResponseSchema,
+  type Todo,
+  type TodoEditableFields,
+} from "@/types/todo";
 import AddIcon from "@mui/icons-material/Add";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import Fab from "@mui/material/Fab";
+import axios from "axios";
 import type React from "react";
-import { useState } from "react";
-
-function* range(begin: number, end: number, step = 1): Generator<number> {
-  for (let i = begin; i < end; i += step) {
-    yield i;
-  }
-}
+import { useEffect, useState } from "react";
+import { ZodError } from "zod";
 
 type DialogOpenStatus = {
   state: "closed" | "openNew" | "openEdit";
@@ -21,17 +22,35 @@ type DialogOpenStatus = {
 
 function App(): React.JSX.Element {
   const [todo, setTodo] = useState<Todo>();
+  const [todos, setTodos] = useState<Todo[]>([]);
 
-  const [todos, setTodos] = useState<Todo[]>(
-    [...range(1, 20)].map(
-      (i): Todo => ({
-        id: i,
-        content: `Todo ${i}`,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-    )
-  );
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get<GetTodosResponse>(
+          `${import.meta.env.VITE_BACKEND_URI}/todos`
+        );
+
+        const newTodos = getTodosResponseSchema.parse(response.data);
+        setTodos(newTodos.todos);
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          if (err.response) {
+            window.alert(`${err.response.status}: ${err.response.data}`);
+          } else {
+            window.alert(`Invalid request!`);
+          }
+        } else if (err instanceof ZodError) {
+          window.alert(`Unexpected response!`);
+          console.error(err.issues);
+        } else if (err instanceof Error) {
+          window.alert(`${err.name}: ${err.message}`);
+        } else {
+          window.alert("Unknown error!");
+        }
+      }
+    })();
+  }, []);
 
   const [dialogOpenStatus, setDialogOpenStatus] = useState<DialogOpenStatus>({
     state: "closed",

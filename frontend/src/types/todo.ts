@@ -6,8 +6,16 @@ export const todoEditableFieldsSchema = z.object({
 
 export type TodoEditableFields = z.infer<typeof todoEditableFieldsSchema>;
 
-export type Todo = {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-} & TodoEditableFields;
+export const todoSchema = todoEditableFieldsSchema.extend({
+  id: z.number().min(1),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+
+export type Todo = z.infer<typeof todoSchema>;
+
+export const getTodosResponseSchema = z.object({
+  todos: z.array(todoSchema),
+});
+
+export type GetTodosResponse = z.infer<typeof getTodosResponseSchema>;
