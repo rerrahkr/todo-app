@@ -13,9 +13,3 @@ export const todoSchema = todoEditableFieldsSchema.extend({
 });
 
 export type Todo = z.infer<typeof todoSchema>;
-
-export const getTodosResponseSchema = z.object({
-  todos: z.array(todoSchema),
-});
-
-export type GetTodosResponse = z.infer<typeof getTodosResponseSchema>;
