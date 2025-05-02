@@ -8,6 +8,9 @@ import Fab from "@mui/material/Fab";
 import type React from "react";
 import { useState } from "react";
 import { useTodos } from "./hooks/load";
+import Masonry from "@mui/lab/Masonry";
+import { seq } from "@/utils";
+import Skeleton from "@mui/material/Skeleton";
 
 type DialogOpenStatus = {
   state: "closed" | "openNew" | "openEdit";
@@ -16,7 +19,7 @@ type DialogOpenStatus = {
 
 function App(): React.JSX.Element {
   const [todo, setTodo] = useState<Todo>();
-  const { todos, setTodos } = useTodos();
+  const { todos, setTodos, isPending } = useTodos();
 
   const [dialogOpenStatus, setDialogOpenStatus] = useState<DialogOpenStatus>({
     state: "closed",
@@ -89,18 +92,34 @@ function App(): React.JSX.Element {
     <>
       <CssBaseline />
       <Container sx={{ my: 4 }}>
-        <TodoList
-          todos={todos}
-          onCheckItem={handleItemChecked}
-          onClickItem={handleItemClicked}
-          columns={{
-            xs: 1,
-            sm: 2,
-            md: 3,
-            lg: 4,
-          }}
-          spacing={2}
-        />
+        {isPending ? (
+          <Masonry
+            columns={{
+              xs: 1,
+              sm: 2,
+              md: 3,
+              lg: 4,
+            }}
+            spacing={2}
+          >
+            {[...seq(6)].map((i) => (
+              <Skeleton key={`skeleton${i}`} variant="rounded" height={60} />
+            ))}
+          </Masonry>
+        ) : (
+          <TodoList
+            todos={todos}
+            onCheckItem={handleItemChecked}
+            onClickItem={handleItemClicked}
+            columns={{
+              xs: 1,
+              sm: 2,
+              md: 3,
+              lg: 4,
+            }}
+            spacing={2}
+          />
+        )}
         <Fab
           color="primary"
           aria-label="Add new todo"
