@@ -11,6 +11,9 @@ import { useTodos } from "./hooks/load";
 import Masonry from "@mui/lab/Masonry";
 import { seq } from "@/utils";
 import Skeleton from "@mui/material/Skeleton";
+import { addTodo } from "./api/add-todo";
+import { getTodos } from "./api/get-todos";
+import { ApiError } from "./api/errors";
 
 type DialogOpenStatus = {
   state: "closed" | "openNew" | "openEdit";
@@ -49,17 +52,12 @@ function App(): React.JSX.Element {
   }
 
   async function handleSubmitCreateTodo(fields: TodoEditableFields) {
-    setTodos((prev) => {
-      const newTodo: Todo = {
-        id: prev.length === 0 ? 1 : prev[prev.length - 1].id + 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ...fields,
-      };
-      return [...prev, newTodo];
-    });
-
-    console.log("create");
+    try {
+      await addTodo(fields);
+      setTodos(await getTodos());
+    } catch (err: unknown) {
+      window.alert(err instanceof ApiError ? err.message : "Unknown error!");
+    }
   }
 
   async function handleSubmitEditTodo(fields: TodoEditableFields) {
