@@ -14,6 +14,7 @@ import Skeleton from "@mui/material/Skeleton";
 import { addTodo } from "./api/add-todo";
 import { getTodos } from "./api/get-todos";
 import { ApiError } from "./api/errors";
+import { deleteTodo } from "./api/delete-todo";
 
 type DialogOpenStatus = {
   state: "closed" | "openNew" | "openEdit";
@@ -81,9 +82,12 @@ function App(): React.JSX.Element {
   }
 
   async function handleItemChecked(cardId: number) {
-    setTodos((prev) => prev.filter((todo) => todo.id !== cardId));
-
-    console.log("delete");
+    try {
+      await deleteTodo(cardId);
+      setTodos(await getTodos());
+    } catch (err: unknown) {
+      window.alert(err instanceof ApiError ? err.message : "Unknown error!");
+    }
   }
 
   return (
