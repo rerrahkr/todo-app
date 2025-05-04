@@ -15,6 +15,7 @@ import { addTodo } from "./api/add-todo";
 import { getTodos } from "./api/get-todos";
 import { ApiError } from "./api/errors";
 import { deleteTodo } from "./api/delete-todo";
+import { updateTodo } from "./api/update-todos";
 
 type DialogOpenStatus = {
   state: "closed" | "openNew" | "openEdit";
@@ -64,21 +65,16 @@ function App(): React.JSX.Element {
   async function handleSubmitEditTodo(fields: TodoEditableFields) {
     const cardId = todo?.id;
     if (cardId == undefined) {
+      window.alert("Todo ID is undefined!");
       return;
     }
 
-    setTodos((prev) => {
-      const i = prev.findIndex((todo) => todo.id === cardId);
-      if (i !== -1) {
-        prev[i] = {
-          ...prev[i],
-          ...fields,
-        };
-      }
-      return prev;
-    });
-
-    console.log("update");
+    try {
+      await updateTodo(cardId, fields);
+      setTodos(await getTodos());
+    } catch (err: unknown) {
+      window.alert(err instanceof ApiError ? err.message : "Unknown error!");
+    }
   }
 
   async function handleItemChecked(cardId: number) {
