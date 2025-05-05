@@ -38,7 +38,7 @@ func (*todoRepository) NewTodo(todo *model.Todo) (*model.Todo, error) {
 }
 
 func (*todoRepository) GetAllTodos() ([]model.Todo, error) {
-	cmd := `SELECT * FROM todos`
+	cmd := `SELECT * FROM todos ORDER BY created_at ASC`
 	rows, err := pool.Query(context.Background(), cmd)
 	if err != nil {
 		return nil, err
