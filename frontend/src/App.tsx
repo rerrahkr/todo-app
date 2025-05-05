@@ -57,6 +57,7 @@ function App(): React.JSX.Element {
     try {
       await addTodo(fields);
       setTodos(await getTodos());
+      handleClosedDialog();
     } catch (err: unknown) {
       window.alert(err instanceof ApiError ? err.message : "Unknown error!");
     }
@@ -72,6 +73,7 @@ function App(): React.JSX.Element {
     try {
       await updateTodo(cardId, fields);
       setTodos(await getTodos());
+      handleClosedDialog();
     } catch (err: unknown) {
       window.alert(err instanceof ApiError ? err.message : "Unknown error!");
     }

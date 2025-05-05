@@ -13,7 +13,7 @@ import { useEffect, useState, useTransition } from "react";
 
 export type EditTodoDialogProps = {
   open: boolean;
-  onSubmit: (fields: TodoEditableFields) => Promise<void>;
+  onSubmit: (fields: TodoEditableFields) => void;
   onClose: () => void;
   title: string;
   defaults?: TodoEditableFields;
@@ -50,9 +50,7 @@ export function EditTodoDialog({
       }
       setFailedValidation(false);
 
-      await onSubmit(parseResult.data);
-
-      onClose();
+      await Promise.resolve(onSubmit(parseResult.data));
     });
   }
 
