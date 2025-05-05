@@ -9,14 +9,20 @@ export function useTodos() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     startTransition(async () => {
       try {
-        const newTodos = await getTodos();
+        const newTodos = await getTodos(abortController.signal);
         setTodos(newTodos);
       } catch (err: unknown) {
         window.alert(err instanceof ApiError ? err.message : "Unknown error!");
       }
     });
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   return {

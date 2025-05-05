@@ -18,12 +18,12 @@ export class ApiError extends Error {
 function makeMessage(err: unknown): string {
   if (axios.isAxiosError(err)) {
     if (err.response) {
-      return `${err.response.status}: ${err.response.data}`;
+      return `[API] ${err.response.status}: ${err.response.data}`;
     } else {
-      return `Invalid request!`;
+      return `[API] ${err.name}: ${err.message}`;
     }
   } else if (err instanceof ZodError) {
-    return `Unexpected response!`;
+    return "[API] Unexpected response!";
   } else if (err instanceof Error) {
     return `${err.name}: ${err.message}`;
   } else {
