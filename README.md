@@ -1,22 +1,31 @@
 # Todo-App
 
-A simple todo list web app.
+This is a simple web application for managing a todo list.
 
-Try to make an app with React (TypeScript + Vite) + Go + PostgreSQL.
+The application consists of a frontend built with React, a backend implemented in Go, and a PostgreSQL database.
 
-You need to prepare an .env file with the following environment variables:
+To run the application, create an `.env` file with the following environment variables:
 
 ```sh
 POSTGRES_DB=dbname
 POSTGRES_USER=username
 POSTGRES_PASSWORD=password
 POSTGRES_PORT=5432
-POSTGRES_HOST=host
+POSTGRES_HOST=database
 POSTGRES_URI=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
 BACKEND_PORT=8080
-VITE_BACKEND_URL=http://localhost:${BACKEND_PORT}
+VITE_BACKEND_URI=/api
 
-FRONTEND_PORT=5173
-FRONTEND_URI=http://localhost:${FRONTEND_PORT}
+FRONTEND_PORT=80
+FRONTEND_URI=http://frontend:${FRONTEND_PORT}
 ```
+
+These 3 parts of the web app run in Docker containers and are managed with Docker Compose.
+
+```sh
+docker compose build
+docker compose up -d
+```
+
+After starting the containers, the frontend is exposed at `http://localhost:8081`.

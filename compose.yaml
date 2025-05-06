@@ -1,4 +1,17 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_BACKEND_URI=${VITE_BACKEND_URI}
+    ports:
+      - "8081:${FRONTEND_PORT}"
+    environment:
+      - VITE_BACKEND_URI=${VITE_BACKEND_URI}
+    depends_on:
+      - backend
+
   backend:
     build:
       context: ./backend
